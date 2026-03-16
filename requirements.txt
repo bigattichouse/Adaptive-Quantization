@@ -1,0 +1,3 @@
+numpy>=1.24
+safetensors>=0.4
+gguf>=0.9          # for verify_gguf.py — or pass --gguf-py to a llama.cpp checkout
