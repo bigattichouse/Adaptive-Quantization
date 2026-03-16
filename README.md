@@ -7,6 +7,10 @@ Instead of picking a quantization level by name (`Q4_K_M`, `Q5_K_M`, …) and ho
 Output models are named by their measured size and quality: `MyModel_8.3GB_30dB.gguf` tells you exactly what you're getting. The files are standard GGUFs loadable by any llama.cpp build — no modifications needed.
 
 ---
+### Read More
+
+Write up on Medium.com : https://bigattichouse.medium.com/llm-quantization-use-file-sizes-and-signal-quality-instead-of-qx-y-35d70919f833
+
 
 ## How it works
 
