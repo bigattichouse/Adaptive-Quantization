@@ -184,11 +184,6 @@ def main() -> None:
     }
     actual_bytes = gguf_path.stat().st_size
     print(f"  GGUF: {len(gguf_tensors)} tensors, {actual_bytes/1e9:.3f} GB on disk")
-
-    if args.predicted_gb is not None:
-        delta_pct = (actual_bytes/1e9 - args.predicted_gb) / args.predicted_gb * 100
-        sign = "+" if delta_pct > 0 else ""
-        print(f"  Predicted size : {args.predicted_gb:.3f} GB  ({sign}{delta_pct:.1f}% delta)")
     print()
 
     # Plan file
@@ -296,20 +291,8 @@ def main() -> None:
 
     actual_model_snr = compute_p5_snr(snr_pairs)
 
-    print(f"  SNR computation:")
-    print(f"    Tensors with SNR data : {len(snr_pairs)}")
-    if unmapped_count:
-        print(f"    Tensors without profile data: {unmapped_count}  (skipped in P5)")
-    print()
-    print(f"  ┌─────────────────────────────────────────┐")
-    if args.predicted_snr is not None:
-        delta = actual_model_snr - args.predicted_snr
-        sign  = "+" if delta >= 0 else ""
-        print(f"  │  Predicted model SNR : {args.predicted_snr:>6.1f} dB              │")
-        print(f"  │  Actual model SNR    : {actual_model_snr:>6.1f} dB  ({sign}{delta:.2f} dB delta) │")
-    else:
-        print(f"  │  Actual model SNR    : {actual_model_snr:>6.1f} dB              │")
-    print(f"  └─────────────────────────────────────────┘")
+    print(f"  SNR computation: {len(snr_pairs)} tensors with profile data"
+          + (f", {unmapped_count} skipped" if unmapped_count else ""))
     print()
 
     if fallback_snr_impact:
@@ -322,7 +305,27 @@ def main() -> None:
             print(f"  {name:<42}  {planned:>8}  {actual:>8}  {psnr:>7.1f}dB  {asnr:>7.1f}dB  {params:>10,}")
         print()
 
-    print("=" * 80)
+    # ── Final summary ─────────────────────────────────────────────────────────
+    actual_gb = actual_bytes / 1e9
+    W = 52
+    print("=" * W)
+    print(f"  RESULT SUMMARY")
+    print("=" * W)
+    if args.predicted_gb is not None:
+        size_delta_pct = (actual_gb - args.predicted_gb) / args.predicted_gb * 100
+        size_sign = "+" if size_delta_pct > 0 else ""
+        print(f"  {'Size predicted:':<20} {args.predicted_gb:>7.3f} GB")
+        print(f"  {'Size actual:':<20} {actual_gb:>7.3f} GB  ({size_sign}{size_delta_pct:.1f}%)")
+    else:
+        print(f"  {'Size actual:':<20} {actual_gb:>7.3f} GB")
+    print()
+    if args.predicted_snr is not None:
+        snr_delta = actual_model_snr - args.predicted_snr
+        print(f"  {'SNR predicted:':<20} {args.predicted_snr:>7.1f} dB")
+        print(f"  {'SNR actual (P5):':<20} {actual_model_snr:>7.1f} dB  ({snr_delta:+.2f} dB)")
+    else:
+        print(f"  {'SNR actual (P5):':<20} {actual_model_snr:>7.1f} dB")
+    print("=" * W)
     print()
 
 
